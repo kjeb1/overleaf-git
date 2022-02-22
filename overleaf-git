@@ -1,0 +1,185 @@
+#!/usr/bin/python3
+
+# Author: Kjetil Borthen
+
+import zipfile, tempfile, shutil, time, git, os, pathlib, configparser, argparse
+from selenium import webdriver
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.firefox.options import Options
+
+configFile = ".overleaf-git"
+
+def isGitRepo(path):
+    try:
+        _ = git.Repo(path).git_dir
+        return True
+    except git.exc.InvalidGitRepositoryError:
+        return False
+
+def getGitRepoName(path):
+    repo = git.Repo(path=path)
+    return os.path.basename(repo.working_dir)
+
+def getGitRoot(path):
+        gitRepo = git.Repo(path, search_parent_directories=True)
+        gitRoot = gitRepo.git.rev_parse("--show-toplevel")
+        return gitRoot
+
+def main():
+    parser = argparse.ArgumentParser(description='Add Overleaf files to Git',
+                                     prog='overleaf-git',
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     epilog='''\
+        For first time use it will ask for the Link Share Url and store it
+        in a configfil within the current Git repo.
+
+        The Overleaf project name should be the same as the Git repo name,
+        but you can specify a custom Overleaf project name in the config file.
+
+        Uses Firefox (via Selenium) to download Overleaf project Zip file.
+
+        Firefox will access the Link Share Url, red from .overleaf-git, and 
+        then get forwarded to the project. And from there downloads the project
+        Zip file. All files, or [file] [file...] will then be extraced into 
+        current folder. It will detect the current Git repo and git-add or
+        git-commit.
+         ''')
+    parser.add_argument('command', nargs="?", default="download", help="Git add|commit|download. Default: download")
+    parser.add_argument('file', nargs="*", default=["all"], help="File(s) from Overleaf. Default: all")
+    parser.add_argument('-m','--msg', nargs="?", default="Commited from Overleaf", help="Git commit message. Default: 'Commited from Overleaf'")
+    parser.add_argument('-l','--link-share-url', nargs="?", help="Overleaf Link Share Url to Overleaf project (read)")
+    parser.add_argument('-p','--project-name', nargs="?", help="Overleaf project name. Default: same as Git repo name")
+    
+    args = parser.parse_args()   
+
+    if args.command:
+        command = args.command
+        
+    if args.file:
+        files = args.file
+        if '.' in files:
+            files = ["all"]
+    
+    if args.msg:
+        commitMsg = args.msg
+    
+    if args.link_share_url:
+        linkShareUrl = args.link_share_url
+    
+    if args.project_name:
+        projectName = args.project_Name
+        
+    # If command is ommited, but a filename is given
+    if not command in {"add", "commit", "download"}:
+        file = command
+        
+    cwd = pathlib.Path.cwd()
+
+    if not isGitRepo(cwd):
+        print(str(cwd) + " is not a Git repo!")
+        exit()
+
+    gitRepoName = getGitRepoName(cwd)
+    gitRoot = getGitRoot(cwd)
+    overleafProjectName = gitRepoName
+    
+    config = configparser.ConfigParser()
+    config.read(gitRoot + "/" + configFile)
+
+    if not args.link_share_url:
+        if not os.path.isfile(gitRoot + "/" + configFile):
+            print("Missing config file " + configFile)
+            inputUrl = input("Provide Link Share Url from Overleaf: ")
+            inputName = input("Provide Overleaf project name (blank if same as Git repo name): ")
+                          
+            if inputUrl:
+                config.add_section('overleaf-git')
+                config.set('overleaf-git','link-share-url', inputUrl)
+            if inputName:
+                config.set('overleaf-git','project-name', inputName)
+            if inputName or inputUrl:
+                with open(gitRoot + "/" + configFile, 'w') as cfg:
+                    config.write(cfg)
+            else:
+                print("blank url!")
+
+        if config.has_option('overleaf-git','project-name') and not args.project_name:
+            projectName = config['overleaf-git']['project-name']
+
+        if config.has_option('overleaf-git','link-share-url'):
+            linkShareUrl = config['overleaf-git']['link-share-url']
+        
+
+    downloadDir = tempfile.mkdtemp()
+
+    options = Options()
+    options.add_argument("-headless")
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.dir", downloadDir)
+    options.set_preference("browser.helperApps.neverAsk.saveToDisk","application/zip,application/octet-stream")
+    driver = webdriver.Firefox(options=options)
+
+    try:
+        driver.get(linkShareUrl)
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.title_contains(gitRepoName))
+    except TimeoutException:
+        print("Loading with Firefox timed out")
+        driver.close()
+        exit()
+
+    if driver.current_url:
+        print("Connected to Overleaf project '" + gitRepoName + "' [" + driver.current_url + "]")
+    else:
+        print("Failed to connect to Overleaf project")
+        driver.close()
+        exit()
+
+    time.sleep(1)
+    driver.set_page_load_timeout(10)
+
+    try:
+        print("Downloading '" + overleafProjectName + ".zip'")
+        driver.get(driver.current_url + "/download/zip")
+    except TimeoutException:
+        pass
+
+    t = 0
+    while not os.path.isfile(downloadDir + "/" + overleafProjectName + ".zip"):
+        time.sleep(1)
+        t += 1
+        if t > 20:
+            print("Download timed out!")
+            break
+
+    try:
+        with zipfile.ZipFile(downloadDir + "/" + overleafProjectName + ".zip","r") as zip_ref:
+            if files == ["all"]:
+                print("Extracting all files from " + overleafProjectName + ".zip")
+                zip_ref.extractall(cwd)
+            else:
+                print("Extracting " + str(files) + " from " + overleafProjectName + ".zip")
+                for file in files:
+                    zip_ref.extract(file, cwd)
+    except:
+        print("Failed to extract " + overleafProjectName + ".zip")
+
+    shutil.rmtree(downloadDir)
+    driver.close()
+
+    gitRepo = git.Repo(gitRoot)
+    
+    if command == "add":
+        gitRepo.index.add(files)
+        print("git-add " + str(files))
+
+    if command == "commit":
+        gitRepo.index.add(files)
+        gitRepo.index.commit(commitMsg)
+        print("git-add, git-commit " + str(files))
+
+if __name__ == "__main__":
+    main()
