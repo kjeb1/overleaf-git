@@ -32,7 +32,7 @@ def main():
                                      epilog='''\
         To be able to download files from Overleaf, the project need to be
         shared with the Link sharing function
-        
+
         For first time use it will ask for the Link Share Url and store it
         in a config file within the current Git repo.
 
@@ -41,16 +41,16 @@ def main():
 
         Uses Firefox (via Selenium) to download Overleaf project Zip file.
 
-        Firefox will access the Link Share Url, red from .overleaf-git, and 
+        Firefox will access the Link Share Url, red from .overleaf-git, and
         then get redirected to the actual project. And from there downloads
-        the project Zip file. All files, or [file] [file...] will then be 
-        extraced into current folder. It will detect the current Git repo 
+        the project Zip file. All files, or [file] [file...] will then be
+        extraced into current folder. It will detect the current Git repo
         and git-add or git-commit.
-        
+
         Valid options for the configfile (.overleaf-git):
-        link-share-url  
-        project-name 
-        
+        link-share-url
+        project-name
+
         The config file is not needed if the options are provided as parameters
          ''')
     parser.add_argument('command', nargs="?", default="download", help="Git add|commit|download. Default: download")
@@ -58,30 +58,30 @@ def main():
     parser.add_argument('-m','--msg', nargs="?", default="Commited from Overleaf", help="Git commit message. Default: 'Commited from Overleaf'")
     parser.add_argument('-l','--link-share-url', nargs="?", help="Overleaf Link Share Url to Overleaf project (read)")
     parser.add_argument('-p','--project-name', nargs="?", help="Overleaf project name. Default: same as Git repo name")
-    
-    args = parser.parse_args()   
+
+    args = parser.parse_args()
 
     if args.command:
         command = args.command
-        
+
     if args.file:
         files = args.file
         if '.' in files:
             files = ["all"]
-    
+
     if args.msg:
         commitMsg = args.msg
-    
+
     if args.link_share_url:
         linkShareUrl = args.link_share_url
-    
+
     if args.project_name:
-        projectName = args.project_Name
-        
+        projectName = args.project_name
+
     # If command is ommited, but a filename is given
     if not command in {"add", "commit", "download"}:
         file = command
-        
+
     cwd = pathlib.Path.cwd()
 
     if not isGitRepo(cwd):
@@ -91,7 +91,7 @@ def main():
     gitRepoName = getGitRepoName(cwd)
     gitRoot = getGitRoot(cwd)
     overleafProjectName = gitRepoName
-    
+
     config = configparser.ConfigParser()
     config.read(gitRoot + "/" + configFile)
 
@@ -100,7 +100,7 @@ def main():
             print("Missing config file " + configFile)
             inputUrl = input("Provide Link Share Url from Overleaf: ")
             inputName = input("Provide Overleaf project name (blank if same as Git repo name): ")
-                          
+
             if inputUrl:
                 config.add_section('overleaf-git')
                 config.set('overleaf-git','link-share-url', inputUrl)
@@ -117,7 +117,7 @@ def main():
 
         if config.has_option('overleaf-git','link-share-url'):
             linkShareUrl = config['overleaf-git']['link-share-url']
-        
+
 
     downloadDir = tempfile.mkdtemp()
 
@@ -181,7 +181,7 @@ def main():
     driver.close()
 
     gitRepo = git.Repo(gitRoot)
-    
+
     if command == "add":
         gitRepo.index.add(files)
         print("git-add " + str(files))
