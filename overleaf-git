@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-# Author: Kjetil Borthen
-
 import zipfile, tempfile, shutil, time, git, os, pathlib, configparser, argparse
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
