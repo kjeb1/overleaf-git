@@ -30,19 +30,28 @@ def main():
                                      prog='overleaf-git',
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog='''\
+        To be able to download files from Overleaf, the project need to be
+        shared with the Link sharing function
+        
         For first time use it will ask for the Link Share Url and store it
-        in a configfil within the current Git repo.
+        in a config file within the current Git repo.
 
         The Overleaf project name should be the same as the Git repo name,
-        but you can specify a custom Overleaf project name in the config file.
+        but you can specify a custom Overleaf project name.
 
         Uses Firefox (via Selenium) to download Overleaf project Zip file.
 
         Firefox will access the Link Share Url, red from .overleaf-git, and 
-        then get forwarded to the project. And from there downloads the project
-        Zip file. All files, or [file] [file...] will then be extraced into 
-        current folder. It will detect the current Git repo and git-add or
-        git-commit.
+        then get redirected to the actual project. And from there downloads
+        the project Zip file. All files, or [file] [file...] will then be 
+        extraced into current folder. It will detect the current Git repo 
+        and git-add or git-commit.
+        
+        Valid options for the configfile (.overleaf-git):
+        link-share-url  
+        project-name 
+        
+        The config file is not needed if the options are provided as parameters
          ''')
     parser.add_argument('command', nargs="?", default="download", help="Git add|commit|download. Default: download")
     parser.add_argument('file', nargs="*", default=["all"], help="File(s) from Overleaf. Default: all")
@@ -120,6 +129,7 @@ def main():
     options.set_preference("browser.helperApps.neverAsk.saveToDisk","application/zip,application/octet-stream")
     driver = webdriver.Firefox(options=options)
 
+    # First connect with the Link Share Url, and then wait to be redirected to the project URL
     try:
         driver.get(linkShareUrl)
         wait = WebDriverWait(driver, 10)
@@ -129,6 +139,7 @@ def main():
         driver.close()
         exit()
 
+    # Now we are forwarded to the project, then we can download the Zip file.
     if driver.current_url:
         print("Connected to Overleaf project '" + gitRepoName + "' [" + driver.current_url + "]")
     else:
@@ -139,6 +150,7 @@ def main():
     time.sleep(1)
     driver.set_page_load_timeout(10)
 
+    # Don't know waht happens here. Firefox clame to fail, but the file is downloaded correctly anyway.
     try:
         print("Downloading '" + overleafProjectName + ".zip'")
         driver.get(driver.current_url + "/download/zip")
