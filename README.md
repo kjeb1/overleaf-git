@@ -18,19 +18,28 @@ optional arguments:
   -p [PROJECT_NAME], --project-name [PROJECT_NAME]
                         Overleaf project name. Default: same as Git repo name
 
+        To be able to download files from Overleaf, the project need to be
+        shared with the Link sharing function
+        
         For first time use it will ask for the Link Share Url and store it
-        in a configfil within the current Git repo.
+        in a config file within the current Git repo.
 
         The Overleaf project name should be the same as the Git repo name,
-        but you can specify a custom Overleaf project name in the config file.
+        but you can specify a custom Overleaf project name.
 
         Uses Firefox (via Selenium) to download Overleaf project Zip file.
 
         Firefox will access the Link Share Url, red from .overleaf-git, and 
-        then get forwarded to the project. And from there downloads the project
-        Zip file. All files, or [file [file ...]] will then be extraced into 
-        current folder. It will detect the current Git repo and git-add or
-        git-commit.
+        then get redirected to the actual project. And from there downloads
+        the project Zip file. All files, or [file] [file...] will then be 
+        extraced into current folder. It will detect the current Git repo 
+        and git-add or git-commit.
+        
+        Valid options for the configfile (.overleaf-git):
+        link-share-url  
+        project-name 
+        
+        The config file is not needed if the options are provided as parameters        
  
 ```
 
