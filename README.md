@@ -18,7 +18,7 @@ optional arguments:
   -p [PROJECT_NAME], --project-name [PROJECT_NAME]
                         Overleaf project name. Default: same as Git repo name
 
-	Files from Overleaf will always be OVERWRITTEN after downlad!
+	Downloaded files from Overleaf will always OVERWRITE local files!
 
         To be able to download files from Overleaf, the project need to be
         shared with the Link sharing function
