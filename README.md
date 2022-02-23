@@ -18,6 +18,8 @@ optional arguments:
   -p [PROJECT_NAME], --project-name [PROJECT_NAME]
                         Overleaf project name. Default: same as Git repo name
 
+	Files from Overleaf will always be OVERWRITTEN after downlad!
+
         To be able to download files from Overleaf, the project need to be
         shared with the Link sharing function
         
@@ -47,8 +49,8 @@ Overleaf <a href="https://no.overleaf.com/learn/how-to/What_is_Link_Sharing%3F">
 
 ## Installation
 ```
-wget https://github.com/mozilla/geckodriver/releases/download/v0.25.0/geckodriver-v0.25.0-linux64.tar.gz
-tar xzf geckodriver-v0.25.0-linux64.tar.gz
+wget https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz
+tar xzf geckodriver-v0.30.0-linux64.tar.gz
 sudo mv geckodriver /usr/bin/geckodriver 
 ```
 

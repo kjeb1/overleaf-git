@@ -32,6 +32,8 @@ def main():
                                      prog='overleaf-git',
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog='''\
+        Files from Overleaf will always be OVERWRITTEN after downlad!
+
         To be able to download files from Overleaf, the project need to be
         shared with the Link sharing function
 
