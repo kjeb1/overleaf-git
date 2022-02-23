@@ -2,12 +2,14 @@
 
 import zipfile, tempfile, shutil, time, git, os, pathlib, configparser, argparse
 from selenium import webdriver
+from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.firefox.options import Options
 
 configFile = ".overleaf-git"
+driverPath = "/usr/bin/geckodriver"
 
 def isGitRepo(path):
     try:
@@ -121,13 +123,14 @@ def main():
 
     downloadDir = tempfile.mkdtemp()
 
+    service = FirefoxService(driverPath,log_path=os.path.devnull)
     options = Options()
     options.add_argument("-headless")
     options.set_preference("browser.download.folderList", 2)
     options.set_preference("browser.download.manager.showWhenStarting", False)
     options.set_preference("browser.download.dir", downloadDir)
     options.set_preference("browser.helperApps.neverAsk.saveToDisk","application/zip,application/octet-stream")
-    driver = webdriver.Firefox(options=options)
+    driver = webdriver.Firefox(options=options, service=service)
 
     # First connect with the Link Share Url, and then wait to be redirected to the project URL
     try:
