@@ -144,7 +144,7 @@ def main():
         driver.close()
         exit()
 
-    # Now we are forwarded to the project, then we can download the Zip file.
+    # Now we are redirected to the project, then we can download the Zip file.
     if driver.current_url:
         print("Connected to Overleaf project '" + gitRepoName + "' [" + driver.current_url + "]")
     else:
@@ -155,7 +155,7 @@ def main():
     time.sleep(1)
     driver.set_page_load_timeout(10)
 
-    # Don't know waht happens here. Firefox clame to fail, but the file is downloaded correctly anyway.
+    # Don't know what happens here. Firefox clame to fail, but the file is downloaded correctly anyway.
     try:
         print("Downloading '" + overleafProjectName + ".zip'")
         driver.get(driver.current_url + "/download/zip")
