@@ -175,6 +175,7 @@ def main():
             if files == ["all"]:
                 print("Extracting all files from " + overleafProjectName + ".zip")
                 zip_ref.extractall(cwd)
+                files = zip_ref.namelist()
             else:
                 print("Extracting " + str(files) + " from " + overleafProjectName + ".zip")
                 for file in files:
@@ -188,13 +189,13 @@ def main():
     gitRepo = git.Repo(gitRoot)
 
     if command == "add":
-        gitRepo.index.add(files)
         print("git-add " + str(files))
+        gitRepo.index.add(files)
 
     if command == "commit":
+        print("git-add, git-commit " + str(files))
         gitRepo.index.add(files)
         gitRepo.index.commit(commitMsg)
-        print("git-add, git-commit " + str(files))
 
 if __name__ == "__main__":
     main()
