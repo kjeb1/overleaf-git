@@ -191,11 +191,13 @@ def main():
     if command == "add":
         print("git-add " + str(files))
         gitRepo.index.add(files)
+        print(gitRepo.git.status())
 
     if command == "commit":
         print("git-add, git-commit " + str(files))
         gitRepo.index.add(files)
         gitRepo.index.commit(commitMsg)
-
+        print(gitRepo.git.status())
+        
 if __name__ == "__main__":
     main()
