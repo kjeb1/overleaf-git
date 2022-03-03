@@ -70,7 +70,7 @@ def main():
 
     if args.file:
         files = args.file
-        if '.' in files:
+        if files == ["."]:
             files = ["all"]
 
     if args.msg:
@@ -83,8 +83,9 @@ def main():
         projectName = args.project_name
 
     # If command is ommited, but a filename is given
-    if not command in {"add", "commit", "download"}:
-        file = command
+    if not command in ["add", "commit", "download"]:
+        files = [command]
+        command = "download"
 
     cwd = pathlib.Path.cwd()
 
@@ -121,7 +122,6 @@ def main():
 
         if config.has_option('overleaf-git','link-share-url'):
             linkShareUrl = config['overleaf-git']['link-share-url']
-
 
     downloadDir = tempfile.mkdtemp()
 
@@ -173,13 +173,10 @@ def main():
     try:
         with zipfile.ZipFile(downloadDir + "/" + overleafProjectName + ".zip","r") as zip_ref:
             if files == ["all"]:
-                print("Extracting all files from " + overleafProjectName + ".zip")
-                zip_ref.extractall(cwd)
                 files = zip_ref.namelist()
-            else:
-                print("Extracting " + str(files) + " from " + overleafProjectName + ".zip")
-                for file in files:
-                    zip_ref.extract(file, cwd)
+            print("Extracting " + str(files) + " from " + overleafProjectName + ".zip")
+            for file in files:
+                zip_ref.extract(file, cwd)
     except:
         print("Failed to extract " + overleafProjectName + ".zip")
 
@@ -198,6 +195,6 @@ def main():
         gitRepo.index.add(files)
         gitRepo.index.commit(commitMsg)
         print(gitRepo.git.status())
-        
+
 if __name__ == "__main__":
     main()
