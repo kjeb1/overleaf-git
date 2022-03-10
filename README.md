@@ -1,5 +1,7 @@
 # overleaf-git
 
+Add your Latex documents direct from <a href="https://overleaf.com">overleaf.com</a> to your Git repo
+
 ```
 usage: overleaf-git [-h] [-m [MSG]] [-l [LINK_SHARE_URL]] [-p [PROJECT_NAME]] [command] [file [file ...]]
 
