@@ -33,7 +33,7 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog='''\
         Downloaded files from Overleaf will always OVERWRITE local files! This
-	    kinda makes sense since we are in a Git repo.
+	kinda makes sense since we are in a Git repo.
 
         To be able to download files from Overleaf, the Overleaf project need 
         to be shared with the Link sharing function.
