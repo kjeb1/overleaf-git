@@ -21,10 +21,10 @@ optional arguments:
                         Overleaf project name. Default: same as Git repo name
 
 	Downloaded files from Overleaf will always OVERWRITE local files! This
-	make sense because we are in a Git repo, but be careful.
+	kinda makes sense since we are in a Git repo
 
-        To be able to download files from Overleaf, the project need to be
-        shared with the Link sharing function
+        To be able to download files from Overleaf, the Overleaf project need 
+	to be shared with the Link sharing function.
         
         For first time use it will ask for the Link Share Url and store it
         in a config file within the current Git repo.
@@ -32,13 +32,14 @@ optional arguments:
         The Overleaf project name should be the same as the Git repo name,
         but you can specify a custom Overleaf project name.
 
-        Uses Firefox (via Selenium) to download Overleaf project Zip file.
+        Uses Firefox (via Selenium) to download Overleaf project Zip file. This
+	is because the Link sharing function uses Javascript.
 
-        Firefox will access the Link Share Url, red from .overleaf-git, and 
-        then get redirected to the actual project. And from there downloads
+        Firefox will access the Link Share Url, red from the .overleaf-git file, 
+	and then get redirected to the actual project. And from there downloads
         the project Zip file. All files, or [file] [file...] will then be 
-        extraced into current folder. It will detect the current Git repo 
-        and git-add or git-commit.
+        extraced from the zip into the current folder. It will detect the current 
+	Git repo and do git-add or git-commit, if specified.
         
         Valid options for the configfile (.overleaf-git):
         link-share-url  
