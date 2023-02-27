@@ -13,17 +13,17 @@ driverPath = "/usr/bin/geckodriver"
 
 def isGitRepo(path):
     try:
-        _ = git.Repo(path).git_dir
+        _ = git.Repo(path=path, search_parent_directories=True)
         return True
     except git.exc.InvalidGitRepositoryError:
         return False
 
 def getGitRepoName(path):
-    repo = git.Repo(path=path)
+    repo = git.Repo(path=path, search_parent_directories=True)
     return os.path.basename(repo.working_dir)
 
 def getGitRoot(path):
-        gitRepo = git.Repo(path, search_parent_directories=True)
+        gitRepo = git.Repo(path=path, search_parent_directories=True)
         gitRoot = gitRepo.git.rev_parse("--show-toplevel")
         return gitRoot
 
